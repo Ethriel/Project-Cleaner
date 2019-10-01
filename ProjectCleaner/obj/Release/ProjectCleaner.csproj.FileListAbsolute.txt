@@ -1,0 +1,10 @@
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\bin\Release\ProjectCleaner.exe.config
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\bin\Release\ProjectCleaner.exe
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\bin\Release\ProjectCleaner.pdb
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Release\ProjectCleaner.ProjectCleaner.resources
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Release\ProjectCleaner.Properties.Resources.resources
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Release\ProjectCleaner.csproj.GenerateResource.cache
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Release\ProjectCleaner.csproj.CoreCompileInputs.cache
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Release\ProjectCleaner.exe
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Release\ProjectCleaner.pdb
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Release\ProjectCleaner.csprojAssemblyReference.cache
