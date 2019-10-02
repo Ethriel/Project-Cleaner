@@ -9,6 +9,15 @@ namespace ProjectCleaner.Classes
     class Cleaner
     {
         string PathToFolder;
+        List<DirectoryInfo> Directories;
+        List<string> RootFolderContents;
+        List<string> InnerFolderContents;
+        public Cleaner()
+        {
+            Directories = new List<DirectoryInfo>();
+            RootFolderContents = new List<string>();
+            InnerFolderContents = new List<string>();
+        }
         public void SetParameters(string pathToFolder)
         {
             Process[] PrName = Process.GetProcessesByName("devenv");
@@ -17,6 +26,7 @@ namespace ProjectCleaner.Classes
                 throw new Exception("Close Visual Studio first!");
             }
             PathToFolder = pathToFolder;
+            PathToFolder = @"D:\TESTS\TOCLEAN_3";
             Work();
         }
 
@@ -27,79 +37,56 @@ namespace ProjectCleaner.Classes
                 throw new Exception("Current folder does not exist!");
             }
             DirectoryInfo DirInfo = new DirectoryInfo(PathToFolder);
-            List<DirectoryInfo> Directories = DirInfo.GetDirectories().ToList();
-            CleanProjectRootFolder(Directories);
-            CleanProjectsFolders(Directories);
+            Directories = DirInfo.GetDirectories().ToList();
+            FillFolders();
+            CleanProjectRootFolder();
+            CleanProjectsFolders();
         }
-        void CleanProjectRootFolder(List<DirectoryInfo> Dirs)
+        void CleanProjectRootFolder()
         {
-            string PathToDebug = "";
-            string PathToX32 = "";
-            string PathToX64 = "";
-            for (int i = 0; i < Dirs.Count; i++)
+            for (int i = 0; i < RootFolderContents.Count; i++)
             {
-                PathToDebug = Dirs[i].FullName + "\\" + "Debug";
-                PathToX32 = Dirs[i].FullName + "\\" + "x32";
-                PathToX64 = Dirs[i].FullName + "\\" + "x64";
-
-                if(Directory.Exists(PathToDebug))
-                {
-                    new DirectoryInfo(PathToDebug).Delete(true);
-                }
-
-                if (Directory.Exists(PathToX32))
-                {
-                    new DirectoryInfo(PathToX32).Delete(true);
-                }
-
-                if (Directory.Exists(PathToX64))
-                {
-                    new DirectoryInfo(PathToX64).Delete(true);
-                }
+                if (Directory.Exists(RootFolderContents[i]))
+                    new DirectoryInfo(RootFolderContents[i]).Delete(true);
             }
             GC.Collect();
         }
 
-        void CleanProjectsFolders(List<DirectoryInfo> Dirs)
+        void CleanProjectsFolders()
         {
-            string PathToInnerDebug = "";
-            string PathToInnderBin = "";
-            string PathToInnerObj = "";
-            string PathToInnerX32 = "";
-            string PathToInnerX64 = "";
-            for (int i = 0; i < Dirs.Count; i++)
+            for (int i = 0; i < InnerFolderContents.Count; i++)
             {
-                PathToInnerDebug = Dirs[i].FullName + "\\" + Dirs[i].Name + "\\" + "Debug";
-                PathToInnderBin = Dirs[i].FullName + "\\" + Dirs[i].Name + "\\" + "bin";
-                PathToInnerObj = Dirs[i].FullName + "\\" + Dirs[i].Name + "\\" + "obj";
-                PathToInnerX32 = Dirs[i].FullName + "\\" + Dirs[i].Name + "\\" + "x32";
-                PathToInnerX64 = Dirs[i].FullName + "\\" + Dirs[i].Name + "\\" + "x64";
-                if (Directory.Exists(PathToInnerDebug))
-                {
-                    new DirectoryInfo(PathToInnerDebug).Delete(true);
-                }
-
-                if(Directory.Exists(PathToInnderBin))
-                {
-                    new DirectoryInfo(PathToInnderBin).Delete(true);
-                }
-
-                if (Directory.Exists(PathToInnerObj))
-                {
-                    new DirectoryInfo(PathToInnerObj).Delete(true);
-                }
-
-                if (Directory.Exists(PathToInnerX32))
-                {
-                    new DirectoryInfo(PathToInnerX32).Delete(true);
-                }
-
-                if (Directory.Exists(PathToInnerX64))
-                {
-                    new DirectoryInfo(PathToInnerX64).Delete(true);
-                }
+                if (Directory.Exists(InnerFolderContents[i]))
+                    new DirectoryInfo(InnerFolderContents[i]).Delete(true);
             }
             GC.Collect();
+        }
+        private void FillRootFolder()
+        {
+            for (int i = 0; i < Directories.Count; i++)
+            {
+                RootFolderContents.Add(Directories[i].FullName + "\\" + "Debug");
+                RootFolderContents.Add(Directories[i].FullName + "\\" + "x32");
+                RootFolderContents.Add(Directories[i].FullName + "\\" + "x64");
+            }
+        }
+
+        private void FillInnerFolders()
+        {
+            for (int i = 0; i < Directories.Count; i++)
+            {
+                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "Debug");
+                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "bin");
+                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "obj");
+                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "x32");
+                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "x64");
+            }
+        }
+
+        private void FillFolders()
+        {
+           FillRootFolder();
+           FillInnerFolders();
         }
     }
 }
