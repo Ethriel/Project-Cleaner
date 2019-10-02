@@ -12,7 +12,7 @@ namespace ProjectCleaner.Classes
         public void SetParameters(string pathToFolder)
         {
             Process[] PrName = Process.GetProcessesByName("devenv");
-            if(PrName.Length > 0)
+            if (PrName.Length > 0)
             {
                 throw new Exception("Close Visual Studio first!");
             }

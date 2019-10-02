@@ -7,3 +7,4 @@ C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Debug\ProjectClean
 C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Debug\ProjectCleaner.csproj.CoreCompileInputs.cache
 C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Debug\ProjectCleaner.exe
 C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Debug\ProjectCleaner.pdb
+C:\Users\Admin\source\repos\ProjectCleaner\ProjectCleaner\obj\Debug\ProjectCleaner.csprojAssemblyReference.cache
