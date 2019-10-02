@@ -33,21 +33,14 @@ namespace ProjectCleaner.Classes
         }
         void CleanProjectRootFolder(List<DirectoryInfo> Dirs)
         {
-            string PathToVs = "";
             string PathToDebug = "";
             string PathToX32 = "";
             string PathToX64 = "";
             for (int i = 0; i < Dirs.Count; i++)
             {
-                PathToVs = Dirs[i].FullName + "\\" + ".vs";
                 PathToDebug = Dirs[i].FullName + "\\" + "Debug";
                 PathToX32 = Dirs[i].FullName + "\\" + "x32";
                 PathToX64 = Dirs[i].FullName + "\\" + "x64";
-
-                if (Directory.Exists(PathToVs))
-                {
-                    new DirectoryInfo(PathToVs).Delete(true);
-                }
 
                 if(Directory.Exists(PathToDebug))
                 {
