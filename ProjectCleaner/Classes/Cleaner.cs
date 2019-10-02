@@ -64,6 +64,7 @@ namespace ProjectCleaner.Classes
                     new DirectoryInfo(PathToX64).Delete(true);
                 }
             }
+            GC.Collect();
         }
 
         void CleanProjectsFolders(List<DirectoryInfo> Dirs)
@@ -105,6 +106,7 @@ namespace ProjectCleaner.Classes
                     new DirectoryInfo(PathToInnerX64).Delete(true);
                 }
             }
+            GC.Collect();
         }
     }
 }
