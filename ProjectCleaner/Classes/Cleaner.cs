@@ -26,7 +26,6 @@ namespace ProjectCleaner.Classes
                 throw new Exception("Close Visual Studio first!");
             }
             PathToFolder = pathToFolder;
-            PathToFolder = @"D:\TESTS\TOCLEAN_3";
             Work();
         }
 
