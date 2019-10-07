@@ -1,13 +1,6 @@
 ﻿using ProjectCleaner.Classes;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ProjectCleaner
@@ -16,9 +9,13 @@ namespace ProjectCleaner
     {
         Cleaner CleanerWork;
         string Path;
+        bool ClearVS;
+        bool ClearRelease;
         public ProjectCleaner()
         {
             CleanerWork = new Cleaner();
+            ClearVS = false;
+            ClearRelease = false;
             InitializeComponent();
         }
 
@@ -30,8 +27,9 @@ namespace ProjectCleaner
             Dialog.SelectedPath = NormalPath;
             Dialog.ShowDialog();
             Path = Dialog.SelectedPath;
-            if(PathOk())
+            if (PathOk())
                 butStart.Visible = true;
+
         }
 
         private void butSeeResults_Click(object sender, EventArgs e)
@@ -43,7 +41,7 @@ namespace ProjectCleaner
         {
             try
             {
-                CleanerWork.SetParameters(Path);
+                CleanerWork.SetParameters(Path, ClearVS, ClearRelease);
                 MessageBox.Show("Project folders were cleaned!", "All ok");
                 butSeeResults.Visible = true;
             }
@@ -55,6 +53,22 @@ namespace ProjectCleaner
         private bool PathOk()
         {
             return !(string.IsNullOrEmpty(Path));
+        }
+
+        private void cbVS_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ClearVS == false)
+                ClearVS = true;
+            else
+                ClearVS = false;
+        }
+
+        private void cbRelease_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ClearRelease == false)
+                ClearRelease = true;
+            else
+                ClearRelease = false;
         }
     }
 }

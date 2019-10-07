@@ -12,20 +12,32 @@ namespace ProjectCleaner.Classes
         List<DirectoryInfo> Directories;
         List<string> RootFolderContents;
         List<string> InnerFolderContents;
+        List<string> PreparedInnerFolders;
+        string[] RootFoldersPatterns;
+        string[] InnerFoldersPaterns;
+        bool ClearVS;
+        bool ClearRelease;
+
         public Cleaner()
         {
             Directories = new List<DirectoryInfo>();
             RootFolderContents = new List<string>();
             InnerFolderContents = new List<string>();
+            PreparedInnerFolders = new List<string>();
         }
-        public void SetParameters(string pathToFolder)
+        public void SetParameters(string pathToFolder, bool clearVS, bool clearRelease)
         {
-            Process[] PrName = Process.GetProcessesByName("devenv");
-            if (PrName.Length > 0)
+            if(clearVS)
             {
-                throw new Exception("Close Visual Studio first!");
+                Process[] PrName = Process.GetProcessesByName("devenv");
+                if (PrName.Length > 0)
+                {
+                    throw new Exception("You want to clear \".vs\" folder. Close Visual Studio first!");
+                }
             }
             PathToFolder = pathToFolder;
+            ClearVS = clearVS;
+            ClearRelease = clearRelease;
             Work();
         }
 
@@ -37,6 +49,7 @@ namespace ProjectCleaner.Classes
             }
             DirectoryInfo DirInfo = new DirectoryInfo(PathToFolder);
             Directories = DirInfo.GetDirectories().ToList();
+            FillPatterns();
             FillFolders();
             CleanProjectRootFolder();
             CleanProjectsFolders();
@@ -64,21 +77,21 @@ namespace ProjectCleaner.Classes
         {
             for (int i = 0; i < Directories.Count; i++)
             {
-                RootFolderContents.Add(Directories[i].FullName + "\\" + "Debug");
-                RootFolderContents.Add(Directories[i].FullName + "\\" + "x32");
-                RootFolderContents.Add(Directories[i].FullName + "\\" + "x64");
+                for (int j = 0; j < RootFoldersPatterns.Length; j++)
+                {
+                    RootFolderContents.Add(Directories[i].FullName + RootFoldersPatterns[j]);
+                }
             }
         }
 
         private void FillInnerFolders()
         {
-            for (int i = 0; i < Directories.Count; i++)
+            for (int i = 0; i < PreparedInnerFolders.Count; i++)
             {
-                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "Debug");
-                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "bin");
-                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "obj");
-                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "x32");
-                InnerFolderContents.Add(Directories[i].FullName + "\\" + Directories[i].Name + "\\" + "x64");
+                for (int j = 0; j < InnerFoldersPaterns.Length; j++)
+                {
+                    InnerFolderContents.Add(PreparedInnerFolders[i] + InnerFoldersPaterns[j]);
+                }
             }
         }
 
@@ -86,6 +99,57 @@ namespace ProjectCleaner.Classes
         {
            FillRootFolder();
            FillInnerFolders();
+        }
+
+        private void FillRootPatt()
+        {
+            if (ClearVS)
+            {
+                RootFoldersPatterns = new string[] { "\\x32\\Debug", "\\x64\\Debug", "\\.vs" };
+            }
+            else if (ClearRelease)
+            {
+                RootFoldersPatterns = new string[] { "\\x32", "\\x64", "\\bin" };
+            }
+            else if(ClearVS && ClearRelease)
+            {
+                RootFoldersPatterns = new string[] { "\\x32", "\\x64", "\\.vs", "\\bin" };
+            }
+            else
+            {
+                RootFoldersPatterns = new string[] { "\\x32\\Debug", "\\x64\\Debug", "\\bin\\Debug" };
+            }
+        }
+
+        private void FillInnerPatt()
+        {
+            PrepareInnerFolders();
+            if (ClearRelease)
+            {
+                InnerFoldersPaterns = new string[] { "\\bin", "\\obj", "\\x32", "\\x64" };
+            }
+            else
+            {
+                InnerFoldersPaterns = new string[] { "\\bin\\Debug", "\\obj", "\\x32\\Debug", "\\x64\\Debug" };
+            }
+        }
+
+        private void FillPatterns()
+        {
+            FillRootPatt();
+            FillInnerPatt();
+        }
+
+        private void PrepareInnerFolders()
+        {
+            for (int i = 0; i < Directories.Count; i++)
+            {
+                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
+                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
+                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
+                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
+                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
+            }
         }
     }
 }
