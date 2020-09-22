@@ -21,9 +21,9 @@ namespace ProjectCleaner
 
         private void butSelectFolder_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog Dialog = new FolderBrowserDialog();
-            string PathWithEnv = @"%USERPROFILE%\source\repos";
-            string NormalPath = Environment.ExpandEnvironmentVariables(PathWithEnv);
+            var Dialog = new FolderBrowserDialog();
+            var PathWithEnv = @"%USERPROFILE%\source\repos";
+            var NormalPath = Environment.ExpandEnvironmentVariables(PathWithEnv);
             Dialog.SelectedPath = NormalPath;
             Dialog.ShowDialog();
             Path = Dialog.SelectedPath;
@@ -57,18 +57,12 @@ namespace ProjectCleaner
 
         private void cbVS_CheckedChanged(object sender, EventArgs e)
         {
-            if (ClearVS == false)
-                ClearVS = true;
-            else
-                ClearVS = false;
+            ClearVS = !ClearVS;
         }
 
         private void cbRelease_CheckedChanged(object sender, EventArgs e)
         {
-            if (ClearRelease == false)
-                ClearRelease = true;
-            else
-                ClearRelease = false;
+            ClearRelease = !ClearRelease;
         }
     }
 }

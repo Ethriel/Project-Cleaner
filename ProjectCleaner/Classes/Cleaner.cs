@@ -8,28 +8,25 @@ namespace ProjectCleaner.Classes
 {
     class Cleaner
     {
-        string PathToFolder;
-        List<DirectoryInfo> Directories;
-        List<string> RootFolderContents;
-        List<string> InnerFolderContents;
-        List<string> PreparedInnerFolders;
-        string[] RootFoldersPatterns;
-        string[] InnerFoldersPaterns;
-        bool ClearVS;
-        bool ClearRelease;
+        private string PathToFolder;
+        private ICollection<string> rootFolderContents;
+        private ICollection<string> innerFolderContents;
+        private IEnumerable<string> RootFoldersPatterns;
+        private IEnumerable<string> InnerFoldersPaterns;
+        private bool ClearVS;
+        private bool ClearRelease;
+        private DirectoryInfo projectsInfo;
 
         public Cleaner()
         {
-            Directories = new List<DirectoryInfo>();
-            RootFolderContents = new List<string>();
-            InnerFolderContents = new List<string>();
-            PreparedInnerFolders = new List<string>();
+            rootFolderContents = new List<string>();
+            innerFolderContents = new List<string>();
         }
         public void SetParameters(string pathToFolder, bool clearVS, bool clearRelease)
         {
-            if(clearVS)
+            if (clearVS)
             {
-                Process[] PrName = Process.GetProcessesByName("devenv");
+                var PrName = Process.GetProcessesByName("devenv");
                 if (PrName.Length > 0)
                 {
                     throw new Exception("You want to clear \".vs\" folder. Close Visual Studio first!");
@@ -41,64 +38,120 @@ namespace ProjectCleaner.Classes
             Work();
         }
 
-        void Work()
+        private void FindRepos(DirectoryInfo dirInfo)
         {
-            if(!Directory.Exists(PathToFolder))
+            var directories = dirInfo.GetDirectories();
+
+            var reposName = default(string);
+
+            if (directories.Length != 0)
+            {
+                var repos = directories.FirstOrDefault(x => x.Name.Equals("repos"));
+
+                if (repos == null)
+                {
+                    foreach (var dir in directories)
+                    {
+                        FindRepos(dir);
+                    }
+                }
+                else
+                {
+                    reposName = repos.FullName;
+                    projectsInfo = new DirectoryInfo(reposName);
+                }
+            }
+        }
+
+        private void FindSource(DirectoryInfo dirInfo)
+        {
+            var directories = dirInfo.GetDirectories();
+
+            if (directories.Any(x => x.Name.Equals("repos")))
+            {
+                FindRepos(dirInfo);
+                return;
+            }
+
+            var sourceName = default(string);
+
+            if (directories.Length != 0)
+            {
+                var source = directories.FirstOrDefault(x => x.Name.Equals("source"));
+
+                if (source == null)
+                {
+                    foreach (var dir in directories)
+                    {
+                        FindSource(dir);
+                    }
+                }
+                else
+                {
+                    sourceName = source.FullName;
+                    FindRepos(source);
+                }
+            }
+        }
+
+        private void DeleteJunkFiles()
+        {
+            var directories = projectsInfo.GetDirectories();
+
+            var path = default(string);
+
+            var dirInfo = default(DirectoryInfo);
+
+            foreach (var dir in directories)
+            {
+                foreach (var rootPatt in RootFoldersPatterns)
+                {
+                    path = string.Concat(dir.FullName, rootPatt);
+                    if (Directory.Exists(path))
+                    {
+                        dirInfo = new DirectoryInfo(path);
+                        dirInfo.Delete(true);
+                    }
+                }
+
+                foreach (var innerPatt in InnerFoldersPaterns)
+                {
+                    path = string.Concat(dir.FullName, innerPatt);
+                    if (Directory.Exists(path))
+                    {
+                        dirInfo = new DirectoryInfo(path);
+                        dirInfo.Delete(true);
+                    }
+                }
+            }
+            GC.Collect();
+        }
+
+        private void Work()
+        {
+            if (!Directory.Exists(PathToFolder))
             {
                 throw new Exception("Current folder does not exist!");
             }
-            DirectoryInfo DirInfo = new DirectoryInfo(PathToFolder);
-            Directories = DirInfo.GetDirectories().ToList();
+
+            var dirInfo = new DirectoryInfo(PathToFolder);
+
             FillPatterns();
-            FillFolders();
-            CleanProjectRootFolder();
-            CleanProjectsFolders();
-        }
-        void CleanProjectRootFolder()
-        {
-            for (int i = 0; i < RootFolderContents.Count; i++)
+
+            FindSource(dirInfo);
+
+            if (projectsInfo == null)
             {
-                if (Directory.Exists(RootFolderContents[i]))
-                    new DirectoryInfo(RootFolderContents[i]).Delete(true);
+                projectsInfo = new DirectoryInfo(PathToFolder);
             }
-            GC.Collect();
+
+            DeleteJunkFiles();
         }
 
-        void CleanProjectsFolders()
+        private void FillPatterns()
         {
-            for (int i = 0; i < InnerFolderContents.Count; i++)
-            {
-                if (Directory.Exists(InnerFolderContents[i]))
-                    new DirectoryInfo(InnerFolderContents[i]).Delete(true);
-            }
-            GC.Collect();
-        }
-        private void FillRootFolder()
-        {
-            for (int i = 0; i < Directories.Count; i++)
-            {
-                for (int j = 0; j < RootFoldersPatterns.Length; j++)
-                {
-                    RootFolderContents.Add(Directories[i].FullName + RootFoldersPatterns[j]);
-                }
-            }
-        }
-
-        private void FillInnerFolders()
-        {
-            for (int i = 0; i < PreparedInnerFolders.Count; i++)
-            {
-                for (int j = 0; j < InnerFoldersPaterns.Length; j++)
-                {
-                    InnerFolderContents.Add(PreparedInnerFolders[i] + InnerFoldersPaterns[j]);
-                }
-            }
-        }
-
-        private void FillFolders()
-        {
-           FillRootFolder();
-           FillInnerFolders();
+            FillRootPatt();
+            FillInnerPatt();
         }
 
         private void FillRootPatt()
@@ -111,7 +164,7 @@ namespace ProjectCleaner.Classes
             {
                 RootFoldersPatterns = new string[] { "\\x32", "\\x64", "\\bin" };
             }
-            else if(ClearVS && ClearRelease)
+            else if (ClearVS && ClearRelease)
             {
                 RootFoldersPatterns = new string[] { "\\x32", "\\x64", "\\.vs", "\\bin" };
             }
@@ -123,7 +176,6 @@ namespace ProjectCleaner.Classes
 
         private void FillInnerPatt()
         {
-            PrepareInnerFolders();
             if (ClearRelease)
             {
                 InnerFoldersPaterns = new string[] { "\\bin", "\\obj", "\\x32", "\\x64" };
@@ -131,24 +183,6 @@ namespace ProjectCleaner.Classes
             else
             {
                 InnerFoldersPaterns = new string[] { "\\bin\\Debug", "\\obj", "\\x32\\Debug", "\\x64\\Debug" };
-            }
-        }
-
-        private void FillPatterns()
-        {
-            FillRootPatt();
-            FillInnerPatt();
-        }
-
-        private void PrepareInnerFolders()
-        {
-            for (int i = 0; i < Directories.Count; i++)
-            {
-                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
-                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
-                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
-                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
-                PreparedInnerFolders.Add(Directories[i].FullName + "\\" + Directories[i].Name);
             }
         }
     }
